@@ -16,7 +16,7 @@ import reproducer.userstorage.UserStorage;
 @ExtendWith(SeleniumExtension.class)
 class LoginIT {
 
-    static final String KC_HOSTNAME = System.getenv().getOrDefault("KC_HOSTNAME", "http://localhost:9080");
+    static final String KC_HOSTNAME = System.getenv().getOrDefault("KC_HOSTNAME", "http://localhost:8080");
     static final String KC_HOSTNAME_ADMIN = System.getenv().getOrDefault("KC_HOSTNAME_ADMIN", KC_HOSTNAME);
     static final String KC_BOOTSTRAP_ADMIN_USERNAME = System.getenv().getOrDefault("KC_BOOTSTRAP_ADMIN_USERNAME", "admin");
     static final String KC_BOOTSTRAP_ADMIN_PASSWORD = System.getenv().getOrDefault("KC_BOOTSTRAP_ADMIN_PASSWORD", "admin");
