@@ -1,0 +1,30 @@
+---
+server:
+  port: 8090
+  error:
+    whitelabel:
+      enabled: true
+    include-message: always
+
+keycloak:
+  base-uri: http://localhost:8080/realms/reproducer/protocol/openid-connect
+  logout-uri: ${keycloak.base-uri}/logout
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: spring-client
+            client-secret: spring-secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid,profile
+        provider:
+          keycloak:
+            authorization-uri: ${keycloak.base-uri}/auth
+            jwk-set-uri: ${keycloak.base-uri}/certs
+            token-uri: ${keycloak.base-uri}/token
+            user-info-uri: ${keycloak.base-uri}/userinfo
+            user-name-attribute: sub

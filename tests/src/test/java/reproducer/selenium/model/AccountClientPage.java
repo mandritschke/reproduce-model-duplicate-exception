@@ -8,8 +8,11 @@ import org.openqa.selenium.support.ui.FluentWait;
 
 import java.time.Duration;
 
+/**
+ * Page model for Keycloak's internal account client.
+ */
 @Slf4j
-public class AccountClientPage {
+public class AccountClientPage implements ClientPage {
 
     private final WebDriver driver;
 
@@ -29,13 +32,11 @@ public class AccountClientPage {
         log.info("Login successful");
     }
 
-    /**
-     * Triggers the logout from the client and returns to the login page.
-     */
+    @Override
     public LoginPage logout() {
         log.info("Logout");
         driver.findElement(menuButtonSelector).click();
         driver.findElement(logoutMenuItemSelector).click();
-        return new LoginPage(driver);
+        return new LoginPage(driver, AccountClientPage::new);
     }
 }

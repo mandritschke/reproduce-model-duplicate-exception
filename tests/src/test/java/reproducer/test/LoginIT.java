@@ -7,8 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.openqa.selenium.WebDriver;
+import reproducer.client.Client;
 import reproducer.selenium.extension.SeleniumExtension;
-import reproducer.selenium.model.AccountClientPage;
+import reproducer.selenium.model.ClientPage;
 import reproducer.selenium.model.LoginPage;
 import reproducer.userstorage.UserStorage;
 
@@ -16,8 +17,9 @@ import reproducer.userstorage.UserStorage;
 @ExtendWith(SeleniumExtension.class)
 class LoginIT {
 
-    static final String KC_HOSTNAME = System.getenv().getOrDefault("KC_HOSTNAME", "http://localhost:8080");
-    static final String KC_HOSTNAME_ADMIN = System.getenv().getOrDefault("KC_HOSTNAME_ADMIN", KC_HOSTNAME);
+    static final String CLIENT = System.getenv().getOrDefault("CLIENT", "reproducer.client.SpringClient");
+    static final String CLIENT_URL = System.getenv().getOrDefault("CLIENT_URL", "http://localhost:8090");
+    static final String KC_HOSTNAME_ADMIN = System.getenv().getOrDefault("KC_HOSTNAME_ADMIN", "http://localhost:8080");
     static final String KC_BOOTSTRAP_ADMIN_USERNAME = System.getenv().getOrDefault("KC_BOOTSTRAP_ADMIN_USERNAME", "admin");
     static final String KC_BOOTSTRAP_ADMIN_PASSWORD = System.getenv().getOrDefault("KC_BOOTSTRAP_ADMIN_PASSWORD", "admin");
     static final String USER_STORAGE = System.getenv().getOrDefault("USER_STORAGE", "reproducer.userstorage.InMemoryUserStorage");
@@ -26,6 +28,7 @@ class LoginIT {
     static final String USER_1 = "testuser1";
     static final String USER_2 = "testuser2";
 
+    static Client client;
     static Keycloak keycloak;
     static UserStorage userStorage;
 
@@ -34,12 +37,13 @@ class LoginIT {
         log.info("""
                 Test Environment
 
-                KC_HOSTNAME={}
+                CLIENT={}
+                CLIENT_URL={}
                 KC_HOSTNAME_ADMIN={}
                 KC_BOOTSTRAP_ADMIN_USERNAME={}
                 KC_BOOTSTRAP_ADMIN_PASSWORD={}
                 USER_STORAGE={}
-                """, KC_HOSTNAME, KC_HOSTNAME_ADMIN, KC_BOOTSTRAP_ADMIN_USERNAME, KC_BOOTSTRAP_ADMIN_PASSWORD, USER_STORAGE);
+                """, CLIENT, CLIENT_URL, KC_HOSTNAME_ADMIN, KC_BOOTSTRAP_ADMIN_USERNAME, KC_BOOTSTRAP_ADMIN_PASSWORD, USER_STORAGE);
 
         keycloak = Keycloak.getInstance(KC_HOSTNAME_ADMIN, "master", KC_BOOTSTRAP_ADMIN_USERNAME, KC_BOOTSTRAP_ADMIN_PASSWORD, "admin-cli");
 
@@ -62,22 +66,20 @@ class LoginIT {
         userStorage.setUp(keycloak, REALM_NAME, KC_HOSTNAME_ADMIN);
         userStorage.deleteUser(USER_1);
         userStorage.deleteUser(USER_2);
+
+        client = Client.forClass(CLIENT);
+        client.setUp(keycloak, REALM_NAME, CLIENT_URL);
     }
 
     @Test
     void testAccountAdminClient(WebDriver driver) throws Exception {
         // at least two passes are necessary to trigger the issue
         for (int i = 0; i < 2; i++) {
-            String accountClientUrl = KC_HOSTNAME + String.format("/realms/%s/account/", REALM_NAME);
-            log.info("Navigating to {}", accountClientUrl);
-            driver.get(accountClientUrl);
-
-            LoginPage loginPage;
-            loginPage = new LoginPage(driver);
+            LoginPage loginPage = client.goToLoginPage(driver);
 
             // 1st user - inconsistent delete before logout
             userStorage.createUser(USER_1);
-            AccountClientPage clientPage = loginPage.loginToAccountClient(USER_1, UserStorage.DEFAULT_PASSWORD);
+            ClientPage clientPage = loginPage.loginToAccountClient(USER_1, UserStorage.DEFAULT_PASSWORD);
             userStorage.deleteUser(USER_1);
             loginPage = clientPage.logout();
 

@@ -8,9 +8,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import java.time.Duration;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Page model of Keycloak's login page.
+ */
 @Slf4j
 public class LoginPage {
 
@@ -20,8 +24,11 @@ public class LoginPage {
     private final By passwordInputSelector = By.cssSelector("input#password");
     private final By loginButtonSelector = By.cssSelector("#kc-login");
 
-    public LoginPage(WebDriver driver) {
+    private final Function<WebDriver, ClientPage> clientPageFunction;
+
+    public LoginPage(WebDriver driver, Function<WebDriver, ClientPage> clientPageFunction) {
         this.driver = driver;
+        this.clientPageFunction = clientPageFunction;
 
         new FluentWait<>(driver)
                 .withTimeout(Duration.ofSeconds(5))
@@ -36,7 +43,7 @@ public class LoginPage {
      * <p>
      * Expects Keycloak's embedded account client.
      */
-    public AccountClientPage loginToAccountClient(String username, String password) {
+    public ClientPage loginToAccountClient(String username, String password) {
         log.info("Login to account client as {}", username);
         WebElement userNameInput = driver.findElement(userNameInputSelector);
         WebElement passwordInput = driver.findElement(passwordInputSelector);
@@ -57,7 +64,7 @@ public class LoginPage {
         }
         log.info("Clicking login button");
         loginButton.click();
-        return new AccountClientPage(driver);
+        return clientPageFunction.apply(driver);
     }
 
     private void assertIsDisplayedAndEnabled(WebElement element, String description) {
