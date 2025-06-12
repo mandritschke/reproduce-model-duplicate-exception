@@ -43,7 +43,7 @@ public class LoginPage {
      * <p>
      * Expects Keycloak's embedded account client.
      */
-    public ClientPage loginToAccountClient(String username, String password) {
+    public ClientPage login(String username, String password) {
         log.info("Login to account client as {}", username);
         WebElement userNameInput = driver.findElement(userNameInputSelector);
         WebElement passwordInput = driver.findElement(passwordInputSelector);

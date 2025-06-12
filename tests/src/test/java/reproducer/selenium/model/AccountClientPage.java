@@ -34,6 +34,11 @@ public class AccountClientPage implements ClientPage {
 
     @Override
     public LoginPage logout() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.interrupted();
+        }
         log.info("Logout");
         driver.findElement(menuButtonSelector).click();
         driver.findElement(logoutMenuItemSelector).click();

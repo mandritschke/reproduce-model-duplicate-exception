@@ -72,20 +72,20 @@ class LoginIT {
     }
 
     @Test
-    void testAccountAdminClient(WebDriver driver) throws Exception {
+    void testLoginLoop(WebDriver driver) throws Exception {
         // at least two passes are necessary to trigger the issue
         for (int i = 0; i < 2; i++) {
             LoginPage loginPage = client.goToLoginPage(driver);
 
             // 1st user - inconsistent delete before logout
             userStorage.createUser(USER_1);
-            ClientPage clientPage = loginPage.loginToAccountClient(USER_1, UserStorage.DEFAULT_PASSWORD);
+            ClientPage clientPage = loginPage.login(USER_1, UserStorage.DEFAULT_PASSWORD);
             userStorage.deleteUser(USER_1);
             loginPage = clientPage.logout();
 
             // 2nd user - consistent delete after logout
             userStorage.createUser(USER_2);
-            clientPage = loginPage.loginToAccountClient(USER_2, UserStorage.DEFAULT_PASSWORD); // 💥 failure on 2nd pass
+            clientPage = loginPage.login(USER_2, UserStorage.DEFAULT_PASSWORD); // 💥 failure on 2nd pass
             loginPage = clientPage.logout();
             userStorage.deleteUser(USER_2);
         }

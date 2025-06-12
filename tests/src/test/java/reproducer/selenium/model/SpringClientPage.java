@@ -25,7 +25,7 @@ public class SpringClientPage implements ClientPage {
                     .withTimeout(Duration.ofSeconds(5))
                     .pollingEvery(Duration.ofSeconds(1))
                     .ignoring(NoSuchElementException.class)
-                    .withMessage("Waiting for account client page to load")
+                    .withMessage("Waiting for Spring client page to load")
                     .until(d -> d.findElement(logoutMenuItemSelector));
 
             log.info("Login successful");
@@ -33,6 +33,11 @@ public class SpringClientPage implements ClientPage {
 
     @Override
     public LoginPage logout() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.interrupted();
+        }
         log.info("Logout");
         driver.findElement(logoutMenuItemSelector).click();
         return new LoginPage(driver, SpringClientPage::new);
